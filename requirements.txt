@@ -4,6 +4,5 @@ selenium
 nltk
 syllapy
 webdriver-manager
-micropython-pkg_resources
 beautifulsoup4
 requests
