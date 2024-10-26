@@ -3,4 +3,5 @@ pandas
 selenium
 nltk
 webdriver-manager
-
+syllapy
+xlsxwriter
