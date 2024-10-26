@@ -9,6 +9,9 @@ import re
 import syllapy
 from webdriver_manager.chrome import ChromeDriverManager
 from io import BytesIO
+import requests
+from bs4 import BeautifulSoup
+
 
 # Download necessary NLTK resources
 nltk.download('punkt')
@@ -151,17 +154,18 @@ options.add_argument('--no-sandbox')  # Bypass OS security model for running in 
 chrome_service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=chrome_service, options=options)
 
-# Function to extract article text using Selenium
+# Function to extract article text using requests and BeautifulSoup
 def extract_article(url, url_id):
     try:
-        driver.get(url)
-        time.sleep(3)  # Allow the page to load, increase if necessary
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad responses
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-        title = driver.title.strip() if driver.title else "No Title"
+        title = soup.title.string.strip() if soup.title else "No Title"
 
-        # Extract text from all paragraphs using Selenium
-        paragraphs = driver.find_elements(By.TAG_NAME, 'p')
-        article_text = ' '.join([p.text.strip() for p in paragraphs if p.text.strip()])
+        # Extract text from all paragraphs
+        paragraphs = soup.find_all('p')
+        article_text = ' '.join([p.get_text(strip=True) for p in paragraphs if p.get_text(strip=True)])
 
         if len(article_text) == 0:
             st.write(f"No content found at {url}.")
