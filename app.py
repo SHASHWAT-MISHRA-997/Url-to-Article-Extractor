@@ -10,6 +10,47 @@ import syllapy
 from webdriver_manager.chrome import ChromeDriverManager
 from io import BytesIO
 
+# Custom CSS for background hover effect and button colors
+st.markdown(""" 
+    <style>
+        body {
+            background: linear-gradient(135deg, rgba(255,0,0,0.7), rgba(0,0,255,0.7));
+            transition: background-color 0.5s ease;
+        }
+        .stButton > button:hover {
+            background-color: rgba(255, 165, 0, 0.8);
+            color: white;
+        }
+        .stButton > button {
+            background-color: rgba(0, 255, 0, 0.7);
+            color: black;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .stButton > button:active {
+            transform: scale(0.95);
+        }
+        .creator-link {
+            color: black;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            display: block;  /* Make the link a block element */
+            text-align: center;  /* Center text */
+            margin-top: 10px;   /* Add some space above */
+        }
+        .creator-link:hover {
+            background-color: white;  /* Background color on hover */
+            color: red;              /* Change text color on hover */
+            padding: 5px;           /* Add some padding on hover */
+            border-radius: 5px;     /* Rounded corners */
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Download necessary NLTK resources
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -20,6 +61,11 @@ st.set_page_config(layout="wide")
 
 # Streamlit title
 st.title("🌟 Advanced Article Text Analysis Platform 🌟")
+# Creator link at the top of the sidebar
+st.sidebar.markdown(
+    '<a href="https://www.linkedin.com/in/sm980/" class="creator-link">Created by SHASHWAT MISHRA</a>',
+    unsafe_allow_html=True
+)
 
 # Option for file upload instructions
 show_instructions = st.radio("Do you want to see the file upload instructions?", ("Yes", "No"))
