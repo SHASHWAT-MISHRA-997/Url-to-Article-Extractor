@@ -124,3 +124,13 @@ Selenium: Web scraping for article extraction
 NLTK: Natural language processing toolkit
 
 syllapy: Syllable counter for readability metrics
+
+
+# License :
+This project is licensed under the Apace 2.0 License - see the LICENSE file for details.
+
+# 🤝 Contributing :
+I welcome contributions! If you want to help improve this project, feel free to submit a pull request or open an issue.
+
+# ✨ Credits :
+Created by Shashwat Mishra
