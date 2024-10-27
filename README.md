@@ -21,7 +21,12 @@ To use the platform, you need to upload the following files:
 
 Input Excel File (Input.xlsx):
 
-Should contain the URLs for analysis, with columns: URL_ID (unique identifier) and URL (full link to the article).
+Should contain the URLs for analysis, with columns: URL_ID (unique identifier) and URL 
+Positive Words File (positive-words.txt):
+List of words considered positive, one per line.
+
+Negative Words File (negative-words.txt):
+List of words considered negative, one per line.
 
 # 🔧 Installation
 
