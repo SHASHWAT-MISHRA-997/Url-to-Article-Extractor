@@ -23,46 +23,45 @@ Input Excel File (Input.xlsx):
 
 Should contain the URLs for analysis, with columns: URL_ID (unique identifier) and URL (full link to the article).
 
-Example:
-Copy code
-| URL_ID | URL                           |
-|--------|-------------------------------|
-| 1      | https://example.com/article1  |
-| 2      | https://example.com/article2  |
-Positive Words File (positive-words.txt):
-
-List of words considered positive, one per line.
-
-Negative Words File (negative-words.txt):
-
-List of words considered negative, one per line.
-
-Example files are available for download in the app interface.
-
 # 🔧 Installation
 
 Clone the Repository: Clone this repository to your local machine.
 
 bash
+
+
 Copy code
+
 git clone https://github.com/SHASHWAT-MISHRA-997/Url-to-Article-Extractor.git
+
 cd Url-to-Article-Extractor
+
 Install Dependencies: Install Python dependencies.
 
 bash
+
 Copy code
+
 pip install -r requirements.txt
+
 Set up NLTK Resources: Download necessary resources for NLTK.
 
 python
+
 Copy code
+
 import nltk
+
 nltk.download('punkt')
+
 nltk.download('stopwords')
+
 Start the Streamlit App: Run the Streamlit application.
 
 bash
+
 Copy code
+
 streamlit run app.py
 
 # 🚀 Usage
