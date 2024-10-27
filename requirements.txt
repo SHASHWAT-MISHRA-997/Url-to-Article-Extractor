@@ -5,3 +5,4 @@ nltk
 webdriver-manager
 syllapy
 xlsxwriter
+openpyxl
