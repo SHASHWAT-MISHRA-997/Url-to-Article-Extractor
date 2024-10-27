@@ -10,6 +10,16 @@ import syllapy
 from webdriver_manager.chrome import ChromeDriverManager
 from io import BytesIO
 
+# Initialize the Selenium WebDriver with updated options
+options = webdriver.ChromeOptions()
+options.add_argument('--headless')  # Run in headless mode
+options.add_argument('--no-sandbox')  # Bypass OS security model
+options.add_argument('--disable-dev-shm-usage')  # Overcome limited resource problems
+options.add_argument('--window-size=1920x1080')  # Set window size
+
+chrome_service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=chrome_service, options=options)
+
 # Download necessary NLTK resources
 nltk.download('punkt')
 nltk.download('stopwords')
