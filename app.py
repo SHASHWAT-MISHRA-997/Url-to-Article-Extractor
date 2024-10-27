@@ -10,16 +10,6 @@ import syllapy
 from webdriver_manager.chrome import ChromeDriverManager
 from io import BytesIO
 
-# Initialize the Selenium WebDriver with updated options
-options = webdriver.ChromeOptions()
-options.add_argument('--headless')  # Run in headless mode
-options.add_argument('--no-sandbox')  # Bypass OS security model
-options.add_argument('--disable-dev-shm-usage')  # Overcome limited resource problems
-options.add_argument('--window-size=1920x1080')  # Set window size
-
-chrome_service = Service(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=chrome_service, options=options)
-
 # Download necessary NLTK resources
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -58,15 +48,15 @@ st.markdown("""
             font-size: 16px;
             font-weight: bold;
             text-decoration: none;
-            display: block;  /* Make the link a block element */
-            text-align: center;  /* Center text */
-            margin-top: 10px;   /* Add some space above */
+            display: block;  
+            text-align: center;  
+            margin-top: 10px;   
         }
         .creator-link:hover {
-            background-color: white;  /* Background color on hover */
-            color: red;              /* Change text color on hover */
-            padding: 5px;           /* Add some padding on hover */
-            border-radius: 5px;     /* Rounded corners */
+            background-color: white;  
+            color: red;              
+            padding: 5px;           
+            border-radius: 5px;     
         }
     </style>
 """, unsafe_allow_html=True)
@@ -81,16 +71,13 @@ st.markdown(
 show_instructions = st.radio("Do you want to see the file upload instructions?", ("Yes", "No"))
 
 if show_instructions == "Yes":
-    st.write("""
-    ### 📁 File Upload Instructions
+    st.write(""" ### 📁 File Upload Instructions
     To initiate the analysis, please upload the following files:
-    
     ---
-    
     1. **Input Excel File (`Input.xlsx`)**:
        - **📝 Description**: This file should contain a list of URLs to be analyzed for text content.
        - **📊 Format**: It must have the following columns:
-         - **`URL_ID`**: A unique identifier for each URL. This can be any alphanumeric string (e.g., 1, 2, 3, or ID001, ID002).
+         - **`URL_ID`**: A unique identifier for each URL.
          - **`URL`**: The complete URL of the article you wish to analyze. Please ensure that each URL is valid and accessible.
        - **🔍 Example**:
        ```
@@ -99,36 +86,29 @@ if show_instructions == "Yes":
        | 1      | https://example.com/article1  |
        | 2      | https://example.com/article2  |
        ```
-    
     ---
-    
     2. **Positive Words File (`positive-words.txt`)**:
-       - **📄 Description**: This text file should include a list of positive words that contribute to positive sentiment analysis.
-       - **📜 Format**: Each line should contain a single positive word (e.g., "excellent", "joyful").
+       - **📄 Description**: This text file should include a list of positive words for sentiment analysis.
+       - **📜 Format**: Each line should contain a single positive word.
        - **✨ Example**:
        ```
        excellent
        joyful
        remarkable
        ```
-    
     ---
-    
     3. **Negative Words File (`negative-words.txt`)**:
-       - **📉 Description**: This text file should include a list of negative words that contribute to negative sentiment analysis.
-       - **📝 Format**: Each line should contain a single negative word (e.g., "terrible", "sad").
+       - **📉 Description**: This text file should include a list of negative words for sentiment analysis.
+       - **📝 Format**: Each line should contain a single negative word.
        - **⚠️ Example**:
        ```
        terrible
        sad
        awful
        ```
-    
     ---
-    
     ### 🚀 Ready to Analyze?
     Once you have prepared and uploaded these files, click the **"Analyze"** button below to start the text analysis process! Your results will be generated in real-time and can be downloaded after processing.
-    
     ### 📁 Example Files
     You can download example files below to help you get started:
     """)
@@ -174,10 +154,8 @@ else:
 positive_file = st.file_uploader("Upload the Positive Words file", type=["txt"])
 if positive_file is not None:
     try:
-        # Attempt to read the file with utf-8 encoding
         positive_words = set(positive_file.read().decode('utf-8').splitlines())
     except UnicodeDecodeError:
-        # If there's a decode error, try another encoding
         positive_file.seek(0)  # Reset file pointer to the start
         positive_words = set(positive_file.read().decode('ISO-8859-1').splitlines())
 else:
@@ -188,10 +166,8 @@ else:
 negative_file = st.file_uploader("Upload the Negative Words file", type=["txt"])
 if negative_file is not None:
     try:
-        # Attempt to read the file with utf-8 encoding
         negative_words = set(negative_file.read().decode('utf-8').splitlines())
     except UnicodeDecodeError:
-        # If there's a decode error, try another encoding
         negative_file.seek(0)  # Reset file pointer to the start
         negative_words = set(negative_file.read().decode('ISO-8859-1').splitlines())
 else:
@@ -203,6 +179,7 @@ options = webdriver.ChromeOptions()
 options.headless = True  # Run in headless mode (no browser window)
 options.add_argument('--disable-gpu')  # Disables GPU hardware acceleration
 options.add_argument('--no-sandbox')  # Bypass OS security model for running in container environments
+options.add_argument('--window-size=1920x1080')  # Set window size
 
 chrome_service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=chrome_service, options=options)
@@ -243,94 +220,63 @@ def analyze_text(text):
     subjectivity_score = (positive_score + negative_score) / (len(words) + 0.000001)
     sentences = nltk.sent_tokenize(text)
     avg_sentence_length = len(words) / len(sentences) if sentences else 0
-    complex_words = [word for word in words if syllapy.count(word) > 2]
-    percentage_complex_words = len(complex_words) / len(words) if words else 0
+    complex_words = [word for word in words if syllapy.count(word) >= 3]
+    percentage_complex_words = len(complex_words) / len(words) * 100 if words else 0
     fog_index = 0.4 * (avg_sentence_length + percentage_complex_words)
-    word_count = len(words)
+    avg_words_per_sentence = len(words) / len(sentences) if sentences else 0
     complex_word_count = len(complex_words)
-    syllable_count = sum(syllapy.count(word) for word in words)
-    syllables_per_word = syllable_count / len(words) if words else 0
-    personal_pronouns = re.findall(r'\b(I|we|my|ours|us)\b', text, re.I)
-    personal_pronoun_count = len(personal_pronouns)
-    avg_word_length = sum(len(word) for word in words) / len(words) if words else 0
-    
+    word_count = len(words)
+    syllables_per_word = sum(syllapy.count(word) for word in words) / word_count if word_count else 0
+    personal_pronouns = [word for word in words if word in ['i', 'me', 'my', 'mine', 'you', 'your', 'yours', 'he', 'him', 'his', 'she', 'her', 'hers', 'it', 'its', 'we', 'us', 'our', 'ours', 'they', 'them', 'their', 'theirs']]
+    avg_word_length = sum(len(word) for word in words) / word_count if word_count else 0
+
     return {
-        "Positive Score": positive_score,
-        "Negative Score": negative_score,
-        "Polarity Score": polarity_score,
-        "Subjectivity Score": subjectivity_score,
-        "Avg Sentence Length": avg_sentence_length,
-        "Percentage of Complex Words": percentage_complex_words,
-        "Fog Index": fog_index,
-        "Complex Word Count": complex_word_count,
-        "Word Count": word_count,
-        "Syllables Per Word": syllables_per_word,
-        "Personal Pronouns": personal_pronoun_count,
-        "Avg Word Length": avg_word_length
+        'Positive Score': positive_score,
+        'Negative Score': negative_score,
+        'Polarity Score': polarity_score,
+        'Subjectivity Score': subjectivity_score,
+        'Average Sentence Length': avg_sentence_length,
+        'Percentage of Complex Words': percentage_complex_words,
+        'Fog Index': fog_index,
+        'Average Number of Words per Sentence': avg_words_per_sentence,
+        'Complex Word Count': complex_word_count,
+        'Word Count': word_count,
+        'Syllables per Word': syllables_per_word,
+        'Personal Pronouns': len(personal_pronouns),
+        'Average Word Length': avg_word_length
     }
 
-# Output DataFrame columns
-output_columns = [
-    'URL_ID', 'URL', 'POSITIVE SCORE', 'NEGATIVE SCORE', 'POLARITY SCORE', 'SUBJECTIVITY SCORE',
-    'AVG SENTENCE LENGTH', 'PERCENTAGE OF COMPLEX WORDS', 'FOG INDEX', 'COMPLEX WORD COUNT',
-    'WORD COUNT', 'SYLLABLE PER WORD', 'PERSONAL PRONOUNS', 'AVG WORD LENGTH'
-]
-output_df = pd.DataFrame(columns=output_columns)
-
-# Placeholder for live results
-live_results_placeholder = st.empty()
-
-# Process each URL
-for index, row in input_df.iterrows():
-    serial_number = index + 1
-    st.write(f"Serial No. {serial_number}: Processing URL ID {row['URL_ID']}...")  # Show serial number with processing
-    title, article_text = extract_article(row['URL'], row['URL_ID'])
+# Button to trigger analysis
+if st.button("Analyze"):
+    results = []
     
-    if article_text:
-        # Display the extracted article and URL
-        live_results_placeholder.subheader(f"URL: {row['URL']}")
-        live_results_placeholder.write(f"Title: {title}")
-        live_results_placeholder.write(article_text[:500] + '...')  # Show first 500 characters of the article
+    for index, row in input_df.iterrows():
+        url_id = row['URL_ID']
+        url = row['URL']
+        title, article_text = extract_article(url, url_id)
         
-        # Display the extracted article and URL
-        st.subheader(f"URL: {row['URL']}")
-        st.write(f"Title: {title}")
-        st.write(article_text[:500] + '...')  # Show first 500 characters of the article
-        
-        analysis_results = analyze_text(article_text)
-        row_data = pd.DataFrame([{
-            'URL_ID': row['URL_ID'],
-            'URL': row['URL'],
-            'POSITIVE SCORE': analysis_results['Positive Score'],
-            'NEGATIVE SCORE': analysis_results['Negative Score'],
-            'POLARITY SCORE': analysis_results['Polarity Score'],
-            'SUBJECTIVITY SCORE': analysis_results['Subjectivity Score'],
-            'AVG SENTENCE LENGTH': analysis_results['Avg Sentence Length'],
-            'PERCENTAGE OF COMPLEX WORDS': analysis_results['Percentage of Complex Words'],
-            'FOG INDEX': analysis_results['Fog Index'],
-            'COMPLEX WORD COUNT': analysis_results['Complex Word Count'],
-            'WORD COUNT': analysis_results['Word Count'],
-            'SYLLABLE PER WORD': analysis_results['Syllables Per Word'],
-            'PERSONAL PRONOUNS': analysis_results['Personal Pronouns'],
-            'AVG WORD LENGTH': analysis_results['Avg Word Length']
-        }])
-        
-        output_df = pd.concat([output_df, row_data], ignore_index=True)
+        if article_text:
+            analysis = analyze_text(article_text)
+            analysis['URL ID'] = url_id
+            analysis['URL'] = url
+            analysis['Title'] = title
+            results.append(analysis)
 
-# Update the placeholder with live results
-        live_results_placeholder.dataframe(output_df)
+    if results:
+        results_df = pd.DataFrame(results)
 
-# Save final results to Excel and create a download link
-output_file_path = 'Output_Results.xlsx'
-output_df.to_excel(output_file_path, index=False)
+        # Show results in Streamlit
+        st.subheader("🔍 Analysis Results")
+        st.dataframe(results_df)
 
-# Provide download link for the output Excel file
-st.download_button(
-    label="Download Results as Excel",
-    data=open(output_file_path, 'rb'),
-    file_name='Output_Results.xlsx',
-    mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-)
+        # Create a BytesIO object for the results DataFrame
+        output_data = BytesIO()
+        with pd.ExcelWriter(output_data, engine='xlsxwriter') as writer:
+            results_df.to_excel(writer, index=False, sheet_name='Analysis Results')
+        output_data.seek(0)  # Reset pointer to the beginning
 
-# Close the browser at the end
-driver.quit()
+        # Download button for results
+        st.download_button("Download Analysis Results", output_data, "analysis_results.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    
+    # Close the driver after analysis
+    driver.quit()
