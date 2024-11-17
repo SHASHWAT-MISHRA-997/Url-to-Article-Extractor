@@ -1,0 +1,8 @@
+[build]
+  publish = "."
+  command = "streamlit run app.py"
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/streamlit"
+  status = 200
