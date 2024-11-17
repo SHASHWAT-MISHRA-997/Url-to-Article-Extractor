@@ -15,11 +15,36 @@ nltk.download('punkt')
 nltk.download('stopwords')
 stop_words = set(nltk.corpus.stopwords.words('english'))
 
-# Set the layout to wide mode
+# Set Streamlit layout to wide mode
 st.set_page_config(layout="wide")
 
-# Streamlit title
-st.title("🌟 Advanced Article Text Analysis Platform 🌟")
+# Streamlit Title
+st.title("🚀 Advanced Article Text Analysis Platform 🚀")
+st.markdown("""
+### 📝 Introduction
+Welcome to the **Advanced Article Text Analysis Platform**, your ultimate tool for extracting, processing and analyzing articles from URLs. This platform is tailored for researchers, analysts and content creators who need detailed insights into textual data.
+
+The application leverages cutting-edge technologies such as **web scraping** and **natural language processing (NLP)** to compute key metrics like sentiment scores, readability and linguistic characteristics. It automates the tedious tasks of manual article analysis and ensures accurate, structured output.
+
+### 🎯 Key Objectives
+The primary goals of this platform are to:
+1. **Extract Content**: Automatically retrieve titles and body text from articles hosted at URLs provided in an input Excel file.
+2. **Analyze Text**: Perform in-depth analysis to compute key variables such as:
+   - **Positive Score** and **Negative Score** for sentiment analysis.
+   - **Fog Index** and **Average Sentence Length** for readability.
+   - **Word Count**, **Complex Words**, and other linguistic features.
+3. **Generate Results**: Provide a live preview of computed results and enable easy download of the final structured data.
+
+### ⚡ Why Use This Platform?
+- **🔄 Automation**: Eliminates the need for manual data collection and analysis.
+- **🎯 Precision**: Computes metrics based on proven linguistic and readability formulas.
+- **🖥️ User-Friendly**: Intuitive interface for uploading files, viewing live results and downloading outputs.
+- **🔧 Customizable**: Allows users to modify the positive and negative word dictionaries for specific use cases.
+
+---
+
+""")
+
 # Custom CSS for background hover effect and button colors
 st.markdown(""" 
     <style>
@@ -67,151 +92,60 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Option for file upload instructions
-show_instructions = st.radio("Do you want to see the file upload instructions?", ("Yes", "No"))
+# File Upload Instructions
+if st.radio("❓ Do you want to see the file upload instructions?", ("Yes", "No")) == "Yes":
+    st.write("""
+    ### 📂 File Upload Instructions:
+    Please upload the following files to proceed:
+    
+    1️⃣ **Input Excel File** (`Input.xlsx`):
+        - Must include columns `URL_ID` and `URL`.
 
-if show_instructions == "Yes":
-    st.write(""" ### 📁 File Upload Instructions
-    To initiate the analysis, please upload the following files:
-    ---
-    1. **Input Excel File (`Input.xlsx`)**:
-       - **📝 Description**: This file should contain a list of URLs to be analyzed for text content.
-       - **📊 Format**: It must have the following columns:
-         - **`URL_ID`**: A unique identifier for each URL.
-         - **`URL`**: The complete URL of the article you wish to analyze. Please ensure that each URL is valid and accessible.
-       - **🔍 Example**:
-       ```
-       | URL_ID | URL                           |
-       |--------|-------------------------------|
-       | 1      | https://example.com/article1  |
-       | 2      | https://example.com/article2  |
-       ```
-    ---
-    2. **Positive Words File (`positive-words.txt`)**:
-       - **📄 Description**: This text file should include a list of positive words for sentiment analysis.
-       - **📜 Format**: Each line should contain a single positive word.
-       - **✨ Example**:
-       ```
-       excellent
-       joyful
-       remarkable
-       ```
-    ---
-    3. **Negative Words File (`negative-words.txt`)**:
-       - **📉 Description**: This text file should include a list of negative words for sentiment analysis.
-       - **📝 Format**: Each line should contain a single negative word.
-       - **⚠️ Example**:
-       ```
-       terrible
-       sad
-       awful
-       ```
-    ---
-    ### 🚀 Ready to Analyze?
-    Once you have prepared and uploaded these files, click the **"Analyze"** button below to start the text analysis process! Your results will be generated in real-time and can be downloaded after processing.
-    ### 📁 Example Files
-    You can download example files below to help you get started:
+    2️⃣ **Positive Words File** (`positive-words.txt`).
+    
+    3️⃣ **Negative Words File** (`negative-words.txt`).
     """)
 
-    # Create example DataFrame for the Input Excel file
-    example_input_df = pd.DataFrame({
-        'URL_ID': [1, 2],
-        'URL': ['https://example.com/article1', 'https://example.com/article2']
-    })
+# File Uploaders
+input_file = st.file_uploader("📥 Upload Input Excel File", type=["xlsx"])
+positive_file = st.file_uploader("📥 Upload Positive Words File", type=["txt"])
+negative_file = st.file_uploader("📥 Upload Negative Words File", type=["txt"])
 
-    # Create example positive words
-    example_positive_words = """excellent
-    joyful
-    remarkable
-    """
+# Validate Uploads
+if not (input_file and positive_file and negative_file):
+    st.warning("⚠️ Please upload all required files.")
+    st.stop()
 
-    # Create example negative words
-    example_negative_words = """terrible
-    sad
-    awful
-    """
+# Load Files
+input_df = pd.read_excel(input_file)
 
-    # Create a BytesIO object for the input Excel file
-    example_input = BytesIO()
-    with pd.ExcelWriter(example_input, engine='xlsxwriter') as writer:
-        example_input_df.to_excel(writer, index=False, sheet_name='Sheet1')
-    example_input.seek(0)  # Reset pointer to the beginning
+# Robust File Decoding for Positive Words
+try:
+    positive_words = set(positive_file.read().decode('utf-8').splitlines())
+except UnicodeDecodeError:
+    positive_file.seek(0)  # Reset the file pointer to the start
+    positive_words = set(positive_file.read().decode('ISO-8859-1').splitlines())
 
-    # Download buttons for example files
-    st.download_button("Download Example Input Excel File", example_input, "example_input.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    st.download_button("Download Example Positive Words File", example_positive_words.encode('utf-8'), "example_positive_words.txt", "text/plain")
-    st.download_button("Download Example Negative Words File", example_negative_words.encode('utf-8'), "example_negative_words.txt", "text/plain")
+# Robust File Decoding for Negative Words
+try:
+    negative_words = set(negative_file.read().decode('utf-8').splitlines())
+except UnicodeDecodeError:
+    negative_file.seek(0)  # Reset the file pointer to the start
+    negative_words = set(negative_file.read().decode('ISO-8859-1').splitlines())
 
-# File uploader for Input.xlsx
-input_file = st.file_uploader("Upload the Input Excel file", type=["xlsx"])
-if input_file is not None:
-    input_df = pd.read_excel(input_file)
-else:
-    st.warning("Please upload the Input Excel file.")
-    st.stop()  # Stop the script if no file is uploaded
-
-# File uploader for positive words
-positive_file = st.file_uploader("Upload the Positive Words file", type=["txt"])
-if positive_file is not None:
-    try:
-        positive_words = set(positive_file.read().decode('utf-8').splitlines())
-    except UnicodeDecodeError:
-        positive_file.seek(0)  # Reset file pointer to the start
-        positive_words = set(positive_file.read().decode('ISO-8859-1').splitlines())
-else:
-    st.warning("Please upload the Positive Words file.")
-    st.stop()  # Stop the script if no file is uploaded
-
-# File uploader for negative words
-negative_file = st.file_uploader("Upload the Negative Words file", type=["txt"])
-if negative_file is not None:
-    try:
-        negative_words = set(negative_file.read().decode('utf-8').splitlines())
-    except UnicodeDecodeError:
-        negative_file.seek(0)  # Reset file pointer to the start
-        negative_words = set(negative_file.read().decode('ISO-8859-1').splitlines())
-else:
-    st.warning("Please upload the Negative Words file.")
-    st.stop()  # Stop the script if no file is uploaded
-
-# Initialize the Selenium WebDriver in headless mode
+# Initialize Selenium WebDriver
 options = webdriver.ChromeOptions()
-options.headless = True  # Run in headless mode (no browser window)
-options.add_argument('--disable-gpu')  # Disables GPU hardware acceleration
-options.add_argument('--no-sandbox')  # Bypass OS security model for running in container environments
-options.add_argument('--window-size=1920x1080')  # Set window size
+options.headless = True
+options.add_argument('--disable-gpu')
+options.add_argument('--no-sandbox')
+options.add_argument('--window-size=1920x1080')
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
-chrome_service = Service(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=chrome_service, options=options)
-
-# Function to extract article text using Selenium
-def extract_article(url, url_id):
-    try:
-        driver.get(url)
-        time.sleep(3)  # Allow the page to load, increase if necessary
-
-        title = driver.title.strip() if driver.title else "No Title"
-
-        # Extract text from all paragraphs using Selenium
-        paragraphs = driver.find_elements(By.TAG_NAME, 'p')
-        article_text = ' '.join([p.text.strip() for p in paragraphs if p.text.strip()])
-
-        if len(article_text) == 0:
-            st.write(f"No content found at {url}.")
-            return title, None
-
-        return title, article_text
-    except Exception as e:
-        st.write(f"Error extracting {url}: {e}")
-        return None, None
-
-# Function to clean text and remove stopwords
+# Functions
 def clean_text(text):
     words = nltk.word_tokenize(text.lower())
-    words = [word for word in words if word.isalpha() and word not in stop_words]
-    return words
+    return [word for word in words if word.isalpha() and word not in stop_words]
 
-# Function to perform text analysis
 def analyze_text(text):
     words = clean_text(text)
     positive_score = sum(1 for word in words if word in positive_words)
@@ -223,11 +157,7 @@ def analyze_text(text):
     complex_words = [word for word in words if syllapy.count(word) >= 3]
     percentage_complex_words = len(complex_words) / len(words) * 100 if words else 0
     fog_index = 0.4 * (avg_sentence_length + percentage_complex_words)
-    avg_words_per_sentence = len(words) / len(sentences) if sentences else 0
-    complex_word_count = len(complex_words)
     word_count = len(words)
-    syllables_per_word = sum(syllapy.count(word) for word in words) / word_count if word_count else 0
-    personal_pronouns = [word for word in words if word in ['i', 'me', 'my', 'mine', 'you', 'your', 'yours', 'he', 'him', 'his', 'she', 'her', 'hers', 'it', 'its', 'we', 'us', 'our', 'ours', 'they', 'them', 'their', 'theirs']]
     avg_word_length = sum(len(word) for word in words) / word_count if word_count else 0
 
     return {
@@ -238,45 +168,50 @@ def analyze_text(text):
         'Average Sentence Length': avg_sentence_length,
         'Percentage of Complex Words': percentage_complex_words,
         'Fog Index': fog_index,
-        'Average Number of Words per Sentence': avg_words_per_sentence,
-        'Complex Word Count': complex_word_count,
         'Word Count': word_count,
-        'Syllables per Word': syllables_per_word,
-        'Personal Pronouns': len(personal_pronouns),
-        'Average Word Length': avg_word_length
+        'Average Word Length': avg_word_length,
     }
 
-# Button to trigger analysis
-if st.button("Analyze"):
-    results = []
-    
-    for index, row in input_df.iterrows():
-        url_id = row['URL_ID']
-        url = row['URL']
-        title, article_text = extract_article(url, url_id)
-        
-        if article_text:
-            analysis = analyze_text(article_text)
-            analysis['URL ID'] = url_id
-            analysis['URL'] = url
-            analysis['Title'] = title
+def summarize_text(text):
+    sentences = nltk.sent_tokenize(text)
+    if len(sentences) > 5:
+        return ' '.join(sentences[:5])  # Return the first 5 sentences as a summary
+    return text  # If the text is short, return it as is
+
+def extract_article(url, url_id):
+    try:
+        driver.get(url)
+        time.sleep(3)
+        title = driver.title.strip() if driver.title else "No Title"
+        paragraphs = driver.find_elements(By.TAG_NAME, 'p')
+        article_text = ' '.join([p.text.strip() for p in paragraphs if p.text.strip()])
+        summary = summarize_text(article_text)
+        return title, summary
+    except Exception as e:
+        st.error(f"❌ Error extracting {url}: {e}")
+        return None, None
+
+# Analysis Button
+results = []
+output_buffer = BytesIO()
+if st.button("🚀 Start Analysis"):
+    for idx, row in input_df.iterrows():
+        processing_no = idx + 1
+        url_id, url = row['URL_ID'], row['URL']
+        st.info(f"🔄 Processing No: {processing_no} | URL_ID: {url_id} | URL: {url}")
+        title, summary = extract_article(url, url_id)
+        if summary:
+            st.write(f"**Title:** {title}")
+            st.write(f"**Description:** {summary}")  # Display the summary of the article
+            analysis = analyze_text(summary)
+            analysis.update({'Processing No': processing_no, 'URL_ID': url_id, 'URL': url, 'Title': title})
             results.append(analysis)
+            results_df = pd.DataFrame(results)
+            st.dataframe(results_df)  # Live Preview
+            with pd.ExcelWriter(output_buffer, engine='xlsxwriter') as writer:
+                results_df.to_excel(writer, index=False, sheet_name='Results')
+            output_buffer.seek(0)
+    st.success("✅ Analysis Complete!")
+    st.download_button("📥 Download Results", output_buffer, "Output_Data_Structure.xlsx")
 
-    if results:
-        results_df = pd.DataFrame(results)
-
-        # Show results in Streamlit
-        st.subheader("🔍 Analysis Results")
-        st.dataframe(results_df)
-
-        # Create a BytesIO object for the results DataFrame
-        output_data = BytesIO()
-        with pd.ExcelWriter(output_data, engine='xlsxwriter') as writer:
-            results_df.to_excel(writer, index=False, sheet_name='Analysis Results')
-        output_data.seek(0)  # Reset pointer to the beginning
-
-        # Download button for results
-        st.download_button("Download Analysis Results", output_data, "analysis_results.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    
-    # Close the driver after analysis
-    driver.quit()
+driver.quit()
