@@ -6,3 +6,4 @@ webdriver-manager
 syllapy
 xlsxwriter
 openpyxl
+undetected-chromedriver
