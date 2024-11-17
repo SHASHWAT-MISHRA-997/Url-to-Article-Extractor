@@ -1,6 +1,7 @@
 streamlit
 pandas
-selenium
 nltk
 syllapy
+selenium
 webdriver-manager
+openpyxl  # For Excel file handling
