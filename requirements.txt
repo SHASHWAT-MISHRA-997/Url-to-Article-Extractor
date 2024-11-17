@@ -2,8 +2,5 @@ streamlit
 pandas
 selenium
 nltk
-webdriver-manager
 syllapy
-xlsxwriter
-openpyxl
-undetected-chromedriver
+webdriver-manager
