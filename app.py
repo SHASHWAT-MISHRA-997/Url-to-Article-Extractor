@@ -7,7 +7,6 @@ import nltk
 import re
 import syllapy
 from io import BytesIO
-from webdriver_manager.chrome import ChromeDriverManager
 
 # Download necessary NLTK resources
 nltk.download('punkt')
@@ -139,7 +138,7 @@ options.add_argument('--disable-gpu')
 options.add_argument('--no-sandbox')
 options.add_argument('--window-size=1920x1080')
 options.add_argument('--disable-dev-shm-usage')  # Add this line
-driver = uc.Chrome(driver_executable_path=ChromeDriverManager().install(), options=options)
+driver = uc.Chrome(options=options)
 
 # Functions
 def clean_text(text):
